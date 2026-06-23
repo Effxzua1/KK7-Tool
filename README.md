@@ -1,64 +1,58 @@
-# 🔥 KK7 Tool - Advanced Discord Self-Bot
+# 🔥 KK7 TOOL v2.7 Professional 🔥
 
-**KK7 Tool** is a powerful and feature-rich Discord self-bot designed for server management, raiding, spamming, and username hunting. Built with Python, it uses Discord's API directly through user tokens.
+**The ultimate tool for Discord** - Powerful selfbot with multiple features for raiding, spamming, cloning, and more.
 
-> ⚠️ **Disclaimer**: This tool violates Discord's Terms of Service. Using self-bots can result in permanent account bans. Use at your own risk and only on servers you own or have explicit permission to test on.
 
----
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 
-## ✨ Features
+## ✨ Main Features
 
-### 🎨 **Interface & Customization**
-- Beautiful terminal interface with **7 color themes**
-- Clean and organized menu system (3 pages)
-- Automatic token validation
-- Configurable Channel ID & Guild ID
+- **🚀 Advanced Spam**
 
-### 📨 **Spam Tools**
-- **Normal Spam** - Send a set number of messages
-- **Ultra Fast Spam** - Multi-threaded spam (up to 4 threads)
-- **Infinite Spam** - Continuous spam until stopped (CTRL+C)
-- **Mass Ping** - Spam with `@everyone` pings
-- **Random Spam** - Uses multiple preloaded raid messages
+- Normal, ultra-fast (multithreaded), and infinite spam
 
-### ☢️ **Nuke / Raid Tools**
-- **Ultra Raid** - Create multiple raid channels + auto-spam them
-- **Delete All Channels** - Mass delete every text channel in the server
-- **Mass Ban** - Ban all server members (with safety for your own account)
-- **Mass Kick** - Kick all server members
+- Mass ping with `@everyone`
 
-### 👤 **Username Tools**
-- **Username Availability Checker**
-  - Check 2 to 5 letter usernames
-  - Smart generation + checking mode
-- **Name Generators**:
-  - **Gunslol** style names
-  - Roblox usernames
-  - TikTok usernames
-  - Instagram usernames
+- Random and custom messages
 
-### 🔧 **Other Features**
-- Automatic `guns.lol` page opening on launch
-- Webhook support for generated name lists
-- Rate limit handling
-- Clean input sanitization
-- Multi-platform color support
+- **💥 Nuke/Raid Tools**
 
----
+- Create multiple raid channels + automatic spam
 
-## 🛠️ Technologies Used
+- Delete all channels
 
-- Python 3
-- `requests` - Discord API interaction
-- `threading` - Multi-threaded spam
-- `webbrowser` - Auto open website
-- Custom ANSI color system
+- Ban or kick all members
 
----
+- **📋 Advanced Server Cloner**
 
-## 🚀 How to Use
+- Complete cloning: name, icon, roles, categories, channels, and emojis
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/kk7-tool.git
-   cd kk7-tool
+- Standalone Emoji Cloner
+
+- **🔧 Extra Tools**
+- Discord Name and Tag Generator
+
+- Username Checker
+
+- Built-in AI Assistant
+
+- Menu Color Changer
+
+- Basic OSINT (Under Development)
+
+- **🎨 Interface**
+
+- Beautiful Menu with Animations
+
+- Customizable Color System
+
+- Full Input Cleanup Support
+
+## 🛠️ Installation
+
+```bash
+git clone https://github.com/yourusername/kk7-tool.git
+cd kk7-tool
+pip install requests
+python main.py 
