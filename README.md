@@ -1,4 +1,4 @@
-# 🔥 KK7 Tool - Advanced Discord Self-Bot
+# ❄️ Winterz Tool - Advanced Discord Self-Bot
 
 **KK7 Tool** is a powerful and feature-rich Discord self-bot designed for server management, raiding, spamming, and username hunting. Built with Python, it uses Discord's API directly through user tokens.
 
@@ -56,9 +56,3 @@
 
 ---
 
-## 🚀 How to Use
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/kk7-tool.git
-   cd kk7-tool
